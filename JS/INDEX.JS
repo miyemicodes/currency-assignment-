@@ -1,21 +1,25 @@
-const dropList = document.querySelectorAll(".drop-list select"),
+const dropList = document.querySelectorAll(".drop-list select"), 
+amount = document.querySelector(".amount input"),
 fromCurrency = document.querySelectorAll(".from select"),
 toCurrency = document.querySelector(".to select"),
+exchangeIcon = document.querySelector(".drop-list .icon"),
+exchangeRateTxt = document.querySelector(".exchange-rate"),
 getButton = document.querySelector("button");
    
+
+//to target selected value USD and NGN
 for (let i = 0; i < dropList.length; i++){
    
     for (currency_code in country_code){
-        //currency still not selected "let" changed to var to check if its working
+        //USD and NPR are finally working
         let selected;
-        console.log(selected);
         if(i == 0){
             selected = currency_code == "USD" ? "selected " : "";
         }else if(i == 1){
-            selected = currency_code == "NPR" ? "selected " : "";  
+            selected = currency_code == "NGN" ? "selected " : "" ;  
         }
 
-        let optionTag = `<option value="${currency_code}">${currency_code}</option>`;
+        let optionTag = `<option value="${currency_code}" ${selected}>${currency_code}</option>`;
         dropList[i].insertAdjacentHTML("beforeend",optionTag);
     }
     dropList[i].addEventListener("change", e => {
@@ -26,7 +30,7 @@ function loadFlag(element) {
 for (code in country_code){
     if(code == element.value) {
         let imgTag = element.parentElement.querySelector("img");
-        imgTag .src = `https://flagsapi.com/${country_code[code]}/flat/64.png`
+        imgTag .src = `https://flagsapi.com/${country_code[code]}/flat/64.png`;
     }
 }
 }
@@ -39,30 +43,34 @@ window.addEventListener("load", () =>{
 getButton.addEventListener("click", e =>{
     e.preventDefault();
     getExchangeRate();
+   
 });
-//exchange rate key not functioning or i think its the button thats not working .....
 
-const exchangeIcon = document.querySelector(".drop-list .icon");
+
+//exchange rate icon now working properly
 exchangeIcon.addEventListener("click", () =>{
 let tempCode = fromCurrency.value;
+tempExch = dropList[0].value;
 fromCurrency.value = toCurrency.value;
+dropList[0].value = dropList[1].value;
 toCurrency.value = tempCode;
+dropList[1].value = tempExch;
+
 loadFlag(fromCurrency);
 loadFlag(toCurrency);
 
-getExchangeRate()
+getExchangeRate();
 });
 
+
 function getExchangeRate() {
-    const amount = document.querySelector(".amount input"),
-    exchangeRateTxt =document.querySelector(".exchange-rate");
     let amountVal = amount.value;
     if(amountVal == "" || amountVal == "0"){
         amount.value = "1"; 
         amountVal = 1;
     }
     exchangeRateTxt.innerText  = "Getting Exchange Rate...";
-    let url =` https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency.value}`;
+    let url =`https://v6.exchangerate-api.com/v6/b0cefabba9bc1e52c9c0f52b/latest/${fromCurrency.value}|${toCurrency.value}`; //added | ${toCurrency.value} based on what i saw in a video
     fetch (url).then(response => response.json()).then(result=>{
         let exchangeRate = result.conversion_rates[toCurrency.value];
         let totalExchangeRate = (amountVal* exchangeRate).toFixed(2);
